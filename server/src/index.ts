@@ -1,21 +1,20 @@
-import "dotenv/config";
-import { drizzle } from "drizzle-orm/node-postgres";
-import { users } from "./db/schema";
+import express from "express";
+import cookieParser from "cookie-parser";
+import authRoutes from "./routes/auth.routes";
 
-const db = drizzle(process.env.DATABASE_URL!);
+const app = express();
+const port = process.env.PORT || 3000;
 
-async function main() {
-  const user: typeof users.$inferInsert = {
-    name: "Hello",
-    email: "hello.aqib",
-  };
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
-  await db.insert(users).values(user);
-  console.log("New user created!");
-  const users1 = await db.select().from(users);
-  console.log("Getting users", users1);
-  await db.update(users).set({ email: "hi.ansari" });
-  console.log("User info updated");
-}
+app.get("/", (req, res) => {
+  res.send("Hello, World!");
+});
 
-main();
+app.use("/api/auth", authRoutes);
+
+app.listen(port, () => {
+  console.log(`Server is running at http://localhost:${port}`);
+});
